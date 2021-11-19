@@ -1,11 +1,18 @@
 package fr.isika.cda11.ohana.project.event.models;
 
+
 import fr.isika.cda11.ohana.project.common.models.Address;
 import lombok.*;
+import org.primefaces.PrimeFaces;
+import org.primefaces.event.SelectEvent;
 
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.persistence.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Entity
@@ -14,7 +21,7 @@ import java.util.*;
 @EqualsAndHashCode
 @ToString
 @NamedQueries({
-        @NamedQuery(name = "Event.findAllEvent", query = "SELECT e FROM Event e")
+        @NamedQuery(name = "Events.findAll", query = "SELECT DISTINCT e FROM Event e")
 })
 public class Event {
 
@@ -33,19 +40,22 @@ public class Event {
     private String description;
 
     @Column(name = "start_date")
-    private LocalDate startDate = LocalDate.now();
+    private Date startDate;
+    public Date getStartDate() {return startDate;}
+    public void setStartDate(Date startDate) {this.startDate = startDate;}
+
 
     @Column(name = "start_time")
-    private LocalTime startTime;
+    private Date startTime;
+
 
     @Column(name = "end_date")
-    private LocalDate endDate;
+    private Date endDate;
+    public Date getEndDate() {return endDate;}
+    public void setEndDate(Date endDate) {this.endDate = endDate;}
 
     @Column(name = "end_time")
     private LocalTime endTime;
-
-    @Transient
-    private int ticketQuantity;
 
     @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
             mappedBy = "event",
@@ -53,18 +63,25 @@ public class Event {
     )
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    private Set<Ticket> tickets = new HashSet<>();
+    private List<Ticket> tickets = new ArrayList<>();
 
     @OneToOne
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Address address;
 
+    @Transient
+    private int ticketQuantity;
+
+    @Transient
+    private Ticket ticket;
+
+    @Transient
+    private String fullAddress;
+
     public void addTicket(Ticket ticket) {
         ticket.setEvent(this);
         tickets.add(ticket);
     }
 
-    @Transient
-    private Ticket ticket;
 }
